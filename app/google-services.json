@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1008744331505",
+    "firebase_url": "https://justjava-5de31.firebaseio.com",
+    "project_id": "justjava-5de31",
+    "storage_bucket": "justjava-5de31.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1008744331505:android:f802ac1a733fa410",
+        "android_client_info": {
+          "package_name": "com.example.harsha.newsapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1008744331505-jd05sd19bd3fu493jorrmnuvnoqbv6b3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.harsha.newsapp",
+            "certificate_hash": "075CD06204254F2E342E68F9B67EECFE0F961906"
+          }
+        },
+        {
+          "client_id": "1008744331505-f34u15v0hd2gd4nod5ot4b6me0fdch6p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwh7TIw8_Jpz5NLqzTVM5iL-4cl4JVTPM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1008744331505-f34u15v0hd2gd4nod5ot4b6me0fdch6p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
