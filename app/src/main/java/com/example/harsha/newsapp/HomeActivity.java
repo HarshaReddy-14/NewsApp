@@ -68,7 +68,7 @@ public class HomeActivity extends AppCompatActivity{
 
         errorMsg = getIntent().getStringExtra("errorMsg");
         if(errorMsg!=null){
-            errorMsg_tv.setText(errorMsg);
+            Toast.makeText(getApplicationContext(),errorMsg,Toast.LENGTH_LONG).show();
         } else{
             errorMsg_tv.setText("");
         }
