@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -27,7 +28,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -37,10 +41,11 @@ public class HomeActivity extends AppCompatActivity{
 
     TextView nameToDisplayTV, soucres_tv, category_tv, sortBy_tv, errorMsg_tv;
     Spinner sourcesDropDown, categoryDropDown, sortByDropDown;
-    String nameToDisplay="",sourceName="", errorMsg="", emailLoggedIN;
+    String nameToDisplay = "", sourceName = "", errorMsg = "", emailLoggedIN, categoryName = "", sortByName = "";
     Button submitBtn;
     ImageButton refreshBtn;
     ProgressBar progressBar;
+    JSONArray sourcesArray;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,19 +72,20 @@ public class HomeActivity extends AppCompatActivity{
         nameToDisplayTV.setText("Hey "+ nameToDisplay);
 
         errorMsg = getIntent().getStringExtra("errorMsg");
+
         if(errorMsg!=null){
             Toast.makeText(getApplicationContext(),errorMsg,Toast.LENGTH_LONG).show();
         } else{
             errorMsg_tv.setText("");
         }
 
-
+        //Building Categories
         List<String> categoryList = new ArrayList<String>();
         categoryList.add("Business");
         categoryList.add("Entertainment");
         categoryList.add("Gaming");
         categoryList.add("General");
-        categoryList.add("Music");
+        categoryList.add("Music ");
         categoryList.add("Science and Nature");
         categoryList.add("Sports");
         categoryList.add("Technology");
@@ -88,6 +94,7 @@ public class HomeActivity extends AppCompatActivity{
         categoryAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         categoryDropDown.setAdapter(categoryAdapter);
 
+        //Building SortByList
         List<String> sortByList = new ArrayList<String>();
         sortByList.add("Top");
         sortByList.add("Popular");
@@ -96,6 +103,8 @@ public class HomeActivity extends AppCompatActivity{
         ArrayAdapter<String> sortByAdapter = new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,sortByList);
         sortByAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         sortByDropDown.setAdapter(sortByAdapter);
+
+        //Checking Internet connection
         boolean isConnected = false;
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
@@ -103,6 +112,7 @@ public class HomeActivity extends AppCompatActivity{
             isConnected = networkInfo.isConnectedOrConnecting();
         }
 
+        //Getting Sources List
         GetSources getSources = new GetSources();
         if(isConnected){
             getSources.execute();
@@ -165,6 +175,12 @@ public class HomeActivity extends AppCompatActivity{
         });
     }
 
+    private void buildSources(List<String> sourcesList) {
+        ArrayAdapter<String> sourcesAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, sourcesList);
+        sourcesAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        sourcesDropDown.setAdapter(sourcesAdapter);
+    }
+
     private class GetSources extends AsyncTask<Void,Void,String>{
 
         @Override
@@ -219,25 +235,18 @@ public class HomeActivity extends AppCompatActivity{
             List<String> sourcesList = new ArrayList<String>();
             try {
                 JSONObject sourcesJsonObj = new JSONObject(response);
-                JSONArray jsonArray = sourcesJsonObj.optJSONArray("sources");
+                JSONArray sourcesArray = sourcesJsonObj.optJSONArray("sources");
 
-                for(int i=0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                    sourceName = jsonObject.optString("name").toString();
+                System.out.println("Source Array :: " + sourcesArray);
+                for (int i = 0; i < sourcesArray.length(); i++) {
+                    JSONObject jSourceObject = sourcesArray.getJSONObject(i);
+                    sourceName = jSourceObject.optString("name").toString();
                     sourcesList.add(sourceName);
-
                 }
                 buildSources(sourcesList);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void buildSources(List<String> sourcesList) {
-        ArrayAdapter<String> sourcesAdapter = new ArrayAdapter<String>(this,R.layout.support_simple_spinner_dropdown_item,sourcesList);
-        sourcesAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        sourcesDropDown.setAdapter(sourcesAdapter);
     }
 }
