@@ -27,9 +27,9 @@ public class SignUpActivity extends AppCompatActivity {
     TextView userNameTVSignUp,emailTVSignUp, passwordTVSignUp;
 
     String userNameToSignUp, emailToSignUp, passwordToSignUp;
-    String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
 
     private DatabaseReference mdatabase;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,7 +126,7 @@ public class SignUpActivity extends AppCompatActivity {
                 boolean isConnected = false;
                 ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-                if(networkInfo != null){
+                if (!CommonUtils.isNull(networkInfo)) {
                     isConnected = networkInfo.isConnectedOrConnecting();
                 }
 
@@ -134,23 +134,23 @@ public class SignUpActivity extends AppCompatActivity {
                 emailToSignUp = emailETForSignUp.getText().toString();
                 passwordToSignUp = passwordETForSignUp.getText().toString();
 
-                if("".equals(userNameToSignUp)){
+                if (CommonUtils.isEmptyString(userNameToSignUp)) {
                     userNameETForSignUp.requestFocus();
                     userNameETForSignUp.setHint("Name cannot be empty");
                     userNameETForSignUp.setHintTextColor(getResources().getColor(R.color.errorColor));
                     userNameTVSignUp.setText("Name");
-                }else if("".equals(emailToSignUp)){
+                } else if (CommonUtils.isEmptyString(emailToSignUp)) {
                     emailETForSignUp.requestFocus();
                     emailETForSignUp.setHint("Email cannot be empty");
                     emailETForSignUp.setHintTextColor(getResources().getColor(R.color.errorColor));
                     emailTVSignUp.setText("E-Mail");
-                }else if(!emailToSignUp.matches(emailPattern)){
+                } else if (!CommonUtils.isValidEmail(emailToSignUp)) {
                     emailETForSignUp.requestFocus();
                     emailETForSignUp.setText("");
                     emailETForSignUp.setHint("Email entered is not valid");
                     emailETForSignUp.setHintTextColor(getResources().getColor(R.color.errorColor));
                     emailTVSignUp.setText("E-Mail");
-                } else if("".equals(passwordToSignUp)){
+                } else if (CommonUtils.isEmptyString(passwordToSignUp)) {
                     passwordETForSignUp.requestFocus();
                     passwordETForSignUp.setHint("Password cannot be empty");
                     passwordETForSignUp.setHintTextColor(getResources().getColor(R.color.errorColor));

@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -41,11 +43,13 @@ public class HomeActivity extends AppCompatActivity{
 
     TextView nameToDisplayTV, soucres_tv, category_tv, sortBy_tv, errorMsg_tv;
     Spinner sourcesDropDown, categoryDropDown, sortByDropDown;
-    String nameToDisplay = "", sourceName = "", errorMsg = "", emailLoggedIN, categoryName = "", sortByName = "";
+    String nameToDisplay = "", sourceName = "", errorMsg = "";
     Button submitBtn;
     ImageButton refreshBtn;
     ProgressBar progressBar;
-    JSONArray sourcesArray;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +77,7 @@ public class HomeActivity extends AppCompatActivity{
 
         errorMsg = getIntent().getStringExtra("errorMsg");
 
-        if(errorMsg!=null){
+        if (!CommonUtils.isEmptyString(errorMsg)) {
             Toast.makeText(getApplicationContext(),errorMsg,Toast.LENGTH_LONG).show();
         } else{
             errorMsg_tv.setText("");
@@ -108,7 +112,7 @@ public class HomeActivity extends AppCompatActivity{
         boolean isConnected = false;
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if(networkInfo != null){
+        if (!CommonUtils.isNull(networkInfo)) {
             isConnected = networkInfo.isConnectedOrConnecting();
         }
 
@@ -138,7 +142,7 @@ public class HomeActivity extends AppCompatActivity{
                 boolean isConnected = false;
                 ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-                if(networkInfo != null){
+                if (!CommonUtils.isNull(networkInfo)) {
                     isConnected = networkInfo.isConnectedOrConnecting();
                 }
                 if(isConnected){
@@ -174,6 +178,35 @@ public class HomeActivity extends AppCompatActivity{
             }
         });
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int menuItemSelected = item.getItemId();
+        if (menuItemSelected == R.id.logout) {
+            logout();
+        }
+        return true;
+    }
+
+    public void logout() {
+
+        sharedPreferences = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+        if (!CommonUtils.isNull(sharedPreferences)) {
+            editor = sharedPreferences.edit();
+            editor.clear();
+            editor.commit();
+            Intent loginIntent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(loginIntent);
+            finish();
+        }
+    }
+
 
     private void buildSources(List<String> sourcesList) {
         ArrayAdapter<String> sourcesAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, sourcesList);
@@ -235,15 +268,18 @@ public class HomeActivity extends AppCompatActivity{
             List<String> sourcesList = new ArrayList<String>();
             try {
                 JSONObject sourcesJsonObj = new JSONObject(response);
-                JSONArray sourcesArray = sourcesJsonObj.optJSONArray("sources");
-
-                System.out.println("Source Array :: " + sourcesArray);
-                for (int i = 0; i < sourcesArray.length(); i++) {
-                    JSONObject jSourceObject = sourcesArray.getJSONObject(i);
-                    sourceName = jSourceObject.optString("name").toString();
-                    sourcesList.add(sourceName);
+                if (!CommonUtils.isNull(sourcesJsonObj)) {
+                    JSONArray sourcesArray = sourcesJsonObj.optJSONArray("sources");
+                    if (!CommonUtils.isNull(sourcesArray)) {
+                        System.out.println("Source Array :: " + sourcesArray);
+                        for (int i = 0; i < sourcesArray.length(); i++) {
+                            JSONObject jSourceObject = sourcesArray.getJSONObject(i);
+                            sourceName = jSourceObject.optString("name").toString();
+                            sourcesList.add(sourceName);
+                        }
+                        buildSources(sourcesList);
+                    }
                 }
-                buildSources(sourcesList);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

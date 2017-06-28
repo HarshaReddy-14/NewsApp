@@ -6,11 +6,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.ImageView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,7 +20,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by harsha on 02/02/17.
@@ -46,6 +44,11 @@ public class NewsFeedActivity extends AppCompatActivity {
 
         GetArticles getArticles = new GetArticles();
         getArticles.execute();
+    }
+
+    private void buildArticles(ArrayList<ArticlesData> articlesData) {
+        adapter = new CustomAdapter(articlesData, getApplicationContext());
+        listView.setAdapter((ListAdapter) adapter);
     }
 
     private class GetArticles extends AsyncTask<Void,Void,String>{
@@ -84,36 +87,34 @@ public class NewsFeedActivity extends AppCompatActivity {
         protected void onPostExecute(String response) {
             try {
                 articlesData = new ArrayList<>();
-                if(response == null){
+                if (CommonUtils.isNull(response)) {
                     Intent homeIntent = new Intent(getApplicationContext(),HomeActivity.class);
                     homeIntent.putExtra("errorMsg","The news source you've selected isn't available with sort type you have selected.");
                     homeIntent.putExtra("username",getSharedPreferences("MyPreferences", Context.MODE_PRIVATE).getString("userName",""));
                     startActivity(homeIntent);
                 } else{
                     JSONObject sourcesJsonObj = new JSONObject(response);
-                    JSONArray jsonArray = sourcesJsonObj.optJSONArray("articles");
+                    if (!CommonUtils.isNull(sourcesJsonObj)) {
+                        JSONArray jsonArray = sourcesJsonObj.optJSONArray("articles");
+                        if (!CommonUtils.isNull(jsonArray)) {
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                    for(int i=0; i < jsonArray.length(); i++) {
-                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                                title = jsonObject.optString("title").toString();
+                                description = jsonObject.optString("description").toString();
+                                imageURI = jsonObject.optString("urlToImage").toString();
+                                url = jsonObject.optString("url").toString();
 
-                        title = jsonObject.optString("title").toString();
-                        description = jsonObject.optString("description").toString();
-                        imageURI = jsonObject.optString("urlToImage").toString();
-                        url = jsonObject.optString("url").toString();
-
-                        articlesData.add(new ArticlesData(title, description, imageURI, url));
+                                articlesData.add(new ArticlesData(title, description, imageURI, url));
+                            }
+                            buildArticles(articlesData);
+                        }
                     }
-                    buildArticles(articlesData);
                 }
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void buildArticles(ArrayList<ArticlesData> articlesData) {
-        adapter = new CustomAdapter(articlesData,getApplicationContext());
-        listView.setAdapter((ListAdapter) adapter);
     }
 }
